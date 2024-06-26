@@ -1,4 +1,4 @@
-## User Management System - Microservice worker
+## User Management System - Microservice User
 
 ## Installation
 
