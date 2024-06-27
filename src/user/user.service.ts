@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -6,6 +6,7 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { CreateUserDto } from './dto/create-user.dto';
 import { omit } from 'lodash';
 import { CreateUserResponseDto } from './dto/create-user.response.dto';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -13,22 +14,22 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private readonly amqpConnection: AmqpConnection
+    private readonly notificationService: NotificationService
   ) {}
 
   async create(dto: CreateUserDto): Promise<CreateUserResponseDto> {
-    const user = this.usersRepository.create(dto);
+    let user: User;
 
-    await this.usersRepository.save(user);
+    try {
+      user = this.usersRepository.create(dto);
 
-    await this.amqpConnection.publish('user.exchange', 'user.created', { ...omit(user, 'password') });
+      await this.usersRepository.save(user);
 
-    this.logger.log(`Published user.created event for userId: ${user.id}`);
+      await this.notificationService.send('user.created', omit(user, 'password'));
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-    return omit(user, 'password');
-  }
-
-  async getAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return user
   }
 }

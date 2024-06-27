@@ -64,7 +64,13 @@ services:
       dockerfile: Dockerfile
     image: microservice-notification:latest
     environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
       RABBITMQ_URI: amqp://user:password@rabbitmq:5672
+      PG_URL: ${PG_URL}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_HOST: redis
       WEBHOOK_URL: ${WEBHOOK_URL}

@@ -5,10 +5,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
+import { Notification } from '../notification/notification.entity';
+import { NotificationService } from '../notification/notification.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Notification]),
     RabbitMQModule.forRootAsync(RabbitMQModule, {
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -24,7 +26,7 @@ import { UserController } from './user.controller';
       inject: [ConfigService],
     }),
   ],
-  providers: [UserService],
+  providers: [UserService, NotificationService],
   controllers: [UserController],
 })
 export class UserModule {}
