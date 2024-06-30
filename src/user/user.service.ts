@@ -41,6 +41,7 @@ export class UserService {
       await queryRunner.release();
     }
 
-    return user;
+    // @ts-ignore
+    return omit(user, 'password');
   }
 }
